@@ -1,5 +1,5 @@
 ---
-title: "2026SpringIGERwebsite"
+title: "2026 Spring IGER Website"
 ---
 
 This is a Quarto website.
