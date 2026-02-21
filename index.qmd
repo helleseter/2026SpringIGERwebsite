@@ -2,12 +2,11 @@
 title: "2026 Spring IGER Website"
 ---
 
-This is a Quarto website. I am testing re-deployment upon push at 16:29 on 2026-02-18.
+This is a Quarto website. I am testing re-deployment upon push at 15:56 on 2026-02-20.
 
-At this point I will place some tabs as placeholders
+Below are some tabs as placeholders
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ## Placeholder 1
 
 Some content will go here
@@ -15,7 +14,6 @@ Some content will go here
 ## Placeholder 2
 
 Somce content will go here too
-
 :::
 
 To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
