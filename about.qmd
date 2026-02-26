@@ -2,7 +2,11 @@
 title: "About"
 ---
 
-About this site
+About this site\
+\
+\## Sam
+
+This is Sam!
 
 ```{r}
 1 + 1
