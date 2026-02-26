@@ -4,9 +4,13 @@ title: "About"
 
 About this site\
 \
-\## Sam
+## Sam
 
 This is Sam!
+
+## Adrian
+
+This is Adrian!!
 
 ```{r}
 1 + 1
