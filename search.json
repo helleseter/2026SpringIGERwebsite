@@ -4,7 +4,14 @@
     "href": "about.html",
     "title": "About",
     "section": "",
-    "text": "About this site\n\n## Sam\nThis is Sam!"
+    "text": "About this site"
+  },
+  {
+    "objectID": "about.html#sam",
+    "href": "about.html#sam",
+    "title": "About",
+    "section": "Sam",
+    "text": "Sam\nThis is Sam!"
   },
   {
     "objectID": "about.html#adrian",
