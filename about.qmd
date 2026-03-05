@@ -14,7 +14,7 @@ This is Adrian!!
 
 ## Evelyn
 
-This is Evelyn!
+This is Evelyn
 
 ```{r}
 1 + 1
