@@ -25,7 +25,14 @@
     "href": "about.html#evelyn",
     "title": "About",
     "section": "Evelyn",
-    "text": "Evelyn\nThis is Evelyn\n\n1 + 1\n\n[1] 2"
+    "text": "Evelyn\nThis is Evelyn!"
+  },
+  {
+    "objectID": "about.html#sophie",
+    "href": "about.html#sophie",
+    "title": "About",
+    "section": "Sophie",
+    "text": "Sophie\nThis is Sophie!\n\n1 + 1\n\n[1] 2"
   },
   {
     "objectID": "index.html",
