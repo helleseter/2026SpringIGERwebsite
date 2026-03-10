@@ -8,6 +8,10 @@ website:
       - href: index.qmd
         text: Home
       - about.qmd
+      - ph01.qmd
+      - ph02.qmd
+      - ph03.qmd
+      - ph04.qmd
 
 format:
   html:
