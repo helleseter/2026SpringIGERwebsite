@@ -1,10 +1,10 @@
 [
   {
-    "objectID": "ph02.html",
-    "href": "ph02.html",
-    "title": "Placeholder 02",
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "2026 Spring IGER Website",
     "section": "",
-    "text": "This is a placeholder for part of the website"
+    "text": "This is a Quarto website. I am testing re-deployment upon push at 16:20 on 2026-02-20.\nBelow are some tabs as placeholders. We will need many more tabs.\n\nPlaceholder 1Placeholder 2\n\n\nSome content will go here\n\n\nSomce content will go here too\n\n\n\nTo learn more about Quarto websites visit https://quarto.org/docs/websites.\n\n1 + 1\n\n[1] 2"
   },
   {
     "objectID": "ph04.html",
@@ -17,20 +17,6 @@
     "objectID": "ph01.html",
     "href": "ph01.html",
     "title": "Placeholder 01",
-    "section": "",
-    "text": "This is a placeholder for part of the website"
-  },
-  {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "2026 Spring IGER Website",
-    "section": "",
-    "text": "This is a Quarto website. I am testing re-deployment upon push at 16:20 on 2026-02-20.\nBelow are some tabs as placeholders. We will need many more tabs.\n\nPlaceholder 1Placeholder 2\n\n\nSome content will go here\n\n\nSomce content will go here too\n\n\n\nTo learn more about Quarto websites visit https://quarto.org/docs/websites.\n\n1 + 1\n\n[1] 2"
-  },
-  {
-    "objectID": "ph03.html",
-    "href": "ph03.html",
-    "title": "Placeholder 03",
     "section": "",
     "text": "This is a placeholder for part of the website"
   },
@@ -68,5 +54,19 @@
     "title": "About",
     "section": "Sophie",
     "text": "Sophie\nThis is Sophie!\n\n1 + 1\n\n[1] 2"
+  },
+  {
+    "objectID": "ph02.html",
+    "href": "ph02.html",
+    "title": "Placeholder 02",
+    "section": "",
+    "text": "This is a placeholder for part of the website"
+  },
+  {
+    "objectID": "ph03.html",
+    "href": "ph03.html",
+    "title": "Placeholder 03",
+    "section": "",
+    "text": "This is a placeholder for part of the website"
   }
 ]
