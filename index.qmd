@@ -1,5 +1,6 @@
 ---
 title: "2026 Spring IGER Website"
+css: styles.css
 ---
 
 This is a Quarto website. I am testing re-deployment upon push at 16:20 on 2026-02-20.

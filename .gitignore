@@ -10,3 +10,4 @@
 
 # Environment variables (API keys)
 .Renviron
+**/*.quarto_ipynb
