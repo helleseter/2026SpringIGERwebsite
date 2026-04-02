@@ -5,6 +5,7 @@ title: "Placeholder 01"
 This is a placeholder for part of the website
 
 ## Setup
+
 ```{r}
 #| label: setup
 
@@ -16,6 +17,7 @@ fredr_set_key(Sys.getenv("FRED_API_KEY"))
 ```
 
 ## Unemployment Rate
+
 ```{r}
 #| label: unemployment
 
@@ -46,6 +48,7 @@ ggplotly(p_unemp, tooltip = c("x", "y", "color")) %>%
 ```
 
 ## JOLTS — Job Openings, Hires, Quits & Layoffs
+
 ```{r}
 #| label: jolts
 
@@ -81,6 +84,7 @@ ggplotly(p_jolts, tooltip = c("x", "y", "color")) %>%
 ```
 
 ## Unemployment Rate: US vs CA vs Ventura County
+
 ```{r}
 #| label: vc-chart
 
@@ -106,6 +110,7 @@ ggplotly(p_recent, tooltip = c("x", "y", "color")) %>%
 ```
 
 ## Latest Snapshot
+
 ```{r}
 #| label: latest-table
 
@@ -124,6 +129,7 @@ knitr::kable(latest, digits = 1)
 ```
 
 ## GDP Growth (Indexed Comparison)
+
 ```{r}
 #| label: gdp-comparison
 
@@ -158,6 +164,7 @@ ggplotly(p_gdp, tooltip = c("x", "y", "color")) %>%
 ```
 
 ## Per Capita Personal Income
+
 ```{r}
 #| label: income-comparison
 
@@ -190,6 +197,7 @@ ggplotly(p_income, tooltip = c("x", "y", "color")) %>%
 ```
 
 ## Population Growth (Indexed Comparison)
+
 ```{r}
 #| label: population-comparison
 
@@ -223,6 +231,7 @@ ggplotly(p_pop, tooltip = c("x", "y", "color")) %>%
 ```
 
 ## Nonfarm Payroll Employment
+
 ```{r}
 #| label: payroll-all
 
