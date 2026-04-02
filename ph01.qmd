@@ -3,3 +3,263 @@ title: "Placeholder 01"
 ---
 
 This is a placeholder for part of the website
+
+## Setup
+
+```{r}
+#| label: setup
+
+library(fredr)
+library(tidyverse)
+library(plotly)
+
+fredr_set_key(Sys.getenv("FRED_API_KEY"))
+```
+
+## Unemployment Rate
+
+```{r}
+#| label: unemployment
+
+us_u <- fredr("UNRATE")                %>% mutate(geo = "United States")
+ca_u <- fredr("CAUR")                  %>% mutate(geo = "California")
+vc_u <- fredr("LAUCN061110000000003A") %>% mutate(geo = "Ventura County")
+
+unemp <- bind_rows(us_u, ca_u, vc_u) %>%
+  select(date, value, geo) %>%
+  filter(date >= as.Date("2000-01-01"))
+
+p_unemp <- ggplot(unemp, aes(x = date, y = value, color = geo)) +
+  geom_line(linewidth = 0.8) +
+  scale_color_manual(values = c(
+    "United States"  = "#1f77b4",
+    "California"     = "#ff7f0e",
+    "Ventura County" = "#2ca02c"
+  )) +
+  labs(
+    title    = "Unemployment Rate (%)",
+    subtitle = "Click legend to isolate a region | Hover for values",
+    x = NULL, y = "Unemployment Rate (%)", color = NULL
+  ) +
+  theme_minimal(base_size = 13)
+
+ggplotly(p_unemp, tooltip = c("x", "y", "color")) %>%
+  layout(hovermode = "x unified")
+```
+
+## JOLTS — Job Openings, Hires, Quits & Layoffs
+
+```{r}
+#| label: jolts
+
+jolts_series <- c(
+  "JTSJOL" = "Job Openings",
+  "JTSHIL" = "Hires",
+  "JTSQUL" = "Quits",
+  "JTSLDL" = "Layoffs & Discharges"
+)
+
+jolts_data <- map_dfr(names(jolts_series), function(id) {
+  fredr(id) %>%
+    mutate(
+      series = jolts_series[[id]],
+      value  = value / 1000
+    )
+}) %>%
+  select(date, value, series) %>%
+  filter(date >= as.Date("2005-01-01"))
+
+p_jolts <- ggplot(jolts_data, aes(x = date, y = value, color = series)) +
+  geom_line(linewidth = 0.8) +
+  labs(
+    title    = "JOLTS: Job Openings, Hires, Quits & Layoffs (millions)",
+    subtitle = "United States only — state & county level data not available for JOLTS",
+    x = NULL, y = "Count (millions)", color = NULL,
+    caption  = "Source: BLS Job Openings and Labor Turnover Survey via FRED"
+  ) +
+  theme_minimal(base_size = 13)
+
+ggplotly(p_jolts, tooltip = c("x", "y", "color")) %>%
+  layout(hovermode = "x unified")
+```
+
+## Unemployment Rate: US vs CA vs Ventura County
+
+```{r}
+#| label: vc-chart
+
+recent_unemp <- unemp %>%
+  filter(date >= as.Date("2010-01-01"))
+
+p_recent <- ggplot(recent_unemp, aes(x = date, y = value, color = geo)) +
+  geom_line(linewidth = 0.8) +
+  scale_color_manual(values = c(
+    "United States"  = "#1f77b4",
+    "California"     = "#ff7f0e",
+    "Ventura County" = "#2ca02c"
+  )) +
+  labs(
+    title    = "Unemployment Rate: US vs CA vs Ventura County",
+    subtitle = "2010–present | Click legend to isolate",
+    x = NULL, y = "Unemployment Rate (%)", color = NULL
+  ) +
+  theme_minimal(base_size = 13)
+
+ggplotly(p_recent, tooltip = c("x", "y", "color")) %>%
+  layout(hovermode = "x unified")
+```
+
+## Latest Snapshot
+
+```{r}
+#| label: latest-table
+
+latest <- recent_unemp %>%
+  group_by(geo) %>%
+  slice_max(date, n = 1) %>%
+  ungroup() %>%
+  arrange(value) %>%
+  rename(
+    Geography        = geo,
+    `Latest Date`    = date,
+    `Unemployment %` = value
+  )
+
+knitr::kable(latest, digits = 1)
+```
+
+## GDP Growth (Indexed Comparison)
+
+```{r}
+#| label: gdp-comparison
+
+vc_gdp <- fredr("GDPALL06111") %>% mutate(geo = "Ventura County")
+ca_gdp <- fredr("CANGSP")      %>% mutate(geo = "California")
+us_gdp <- fredr("GDPA")        %>% mutate(geo = "United States", value = value * 1000)
+
+gdp_all <- bind_rows(vc_gdp, ca_gdp, us_gdp) %>%
+  select(date, value, geo) %>%
+  filter(date >= as.Date("2001-01-01")) %>%
+  group_by(geo) %>%
+  mutate(indexed = value / first(value) * 100) %>%
+  ungroup()
+
+p_gdp <- ggplot(gdp_all, aes(x = date, y = indexed, color = geo)) +
+  geom_line(linewidth = 0.8) +
+  geom_point(size = 1.5) +
+  scale_color_manual(values = c(
+    "United States"  = "#1f77b4",
+    "California"     = "#ff7f0e",
+    "Ventura County" = "#2ca02c"
+  )) +
+  labs(
+    title    = "GDP Growth — Indexed to 2001 (100 = Starting Point)",
+    subtitle = "Allows fair comparison across different-sized economies | Annual",
+    x = NULL, y = "Index (2001 = 100)", color = NULL
+  ) +
+  theme_minimal(base_size = 13)
+
+ggplotly(p_gdp, tooltip = c("x", "y", "color")) %>%
+  layout(hovermode = "x unified")
+```
+
+## Per Capita Personal Income
+
+```{r}
+#| label: income-comparison
+
+vc_inc <- fredr("PCPI06111")       %>% mutate(geo = "Ventura County")
+ca_inc <- fredr("CAPCPI")          %>% mutate(geo = "California")
+us_inc <- fredr("A792RC0A052NBEA") %>% mutate(geo = "United States")
+
+income_all <- bind_rows(vc_inc, ca_inc, us_inc) %>%
+  select(date, value, geo) %>%
+  filter(date >= as.Date("2000-01-01"))
+
+p_income <- ggplot(income_all, aes(x = date, y = value, color = geo)) +
+  geom_line(linewidth = 0.8) +
+  geom_point(size = 1.5) +
+  scale_color_manual(values = c(
+    "United States"  = "#1f77b4",
+    "California"     = "#ff7f0e",
+    "Ventura County" = "#2ca02c"
+  )) +
+  scale_y_continuous(labels = scales::dollar) +
+  labs(
+    title    = "Per Capita Personal Income",
+    subtitle = "US vs California vs Ventura County | Annual",
+    x = NULL, y = "Dollars per person", color = NULL
+  ) +
+  theme_minimal(base_size = 13)
+
+ggplotly(p_income, tooltip = c("x", "y", "color")) %>%
+  layout(hovermode = "x unified")
+```
+
+## Population Growth (Indexed Comparison)
+
+```{r}
+#| label: population-comparison
+
+vc_pop <- fredr("CAVENT2POP") %>% mutate(geo = "Ventura County", value = value * 1000)
+ca_pop <- fredr("CAPOP")      %>% mutate(geo = "California",     value = value * 1000)
+us_pop <- fredr("POPTHM")     %>% mutate(geo = "United States",  value = value * 1000)
+
+pop_all <- bind_rows(vc_pop, ca_pop, us_pop) %>%
+  select(date, value, geo) %>%
+  filter(date >= as.Date("2000-01-01")) %>%
+  group_by(geo) %>%
+  mutate(indexed = value / first(value) * 100) %>%
+  ungroup()
+
+p_pop <- ggplot(pop_all, aes(x = date, y = indexed, color = geo)) +
+  geom_line(linewidth = 0.8) +
+  scale_color_manual(values = c(
+    "United States"  = "#1f77b4",
+    "California"     = "#ff7f0e",
+    "Ventura County" = "#2ca02c"
+  )) +
+  labs(
+    title    = "Population Growth — Indexed to 2000 (100 = Starting Point)",
+    subtitle = "Is Ventura County growing faster or slower than the state and nation?",
+    x = NULL, y = "Index (2000 = 100)", color = NULL
+  ) +
+  theme_minimal(base_size = 13)
+
+ggplotly(p_pop, tooltip = c("x", "y", "color")) %>%
+  layout(hovermode = "x unified")
+```
+
+## Nonfarm Payroll Employment
+
+```{r}
+#| label: payroll-all
+
+us_pay <- fredr("PAYEMS")    %>% mutate(geo = "United States")
+ca_pay <- fredr("CANA")      %>% mutate(geo = "California")
+vc_pay <- fredr("OXNA106NA") %>% mutate(geo = "Ventura County (MSA)")
+
+payroll_all <- bind_rows(us_pay, ca_pay, vc_pay) %>%
+  select(date, value, geo) %>%
+  filter(date >= as.Date("2000-01-01")) %>%
+  group_by(geo) %>%
+  mutate(indexed = value / first(value) * 100) %>%
+  ungroup()
+
+p_payroll <- ggplot(payroll_all, aes(x = date, y = indexed, color = geo)) +
+  geom_line(linewidth = 0.8) +
+  scale_color_manual(values = c(
+    "United States"        = "#1f77b4",
+    "California"           = "#ff7f0e",
+    "Ventura County (MSA)" = "#2ca02c"
+  )) +
+  labs(
+    title    = "Nonfarm Payroll Employment — Indexed to 2000 (100 = Starting Point)",
+    subtitle = "Ventura County MSA (Oxnard-Thousand Oaks-Ventura) vs CA vs US | Monthly",
+    x = NULL, y = "Index (2000 = 100)", color = NULL
+  ) +
+  theme_minimal(base_size = 13)
+
+ggplotly(p_payroll, tooltip = c("x", "y", "color")) %>%
+  layout(hovermode = "x unified")
+```
