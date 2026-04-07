@@ -1,13 +1,26 @@
 body {
-  background-color: white;
+  background-color: #fff;
   color:black;
   font-family: sans-serif;
 }
 
 
-/* this is just makig the headings a dark blue color */
+/* this is just makig the headings  */
 h1, h2, h3{
-  color: black;
+  color: #473f3f;
+  
+}
+
+.navbar {
+  background-color:#cb132a;
+  border-bottom: 2px solid #cb132a;
+  font-family: sans-serif;
+  color:#473f3f;
+}
+
+.navbar,
+.navbar * {
+  color: #473f3f
 }
 
 /* this right here adds the little border around the text, the padding is how far the text is from the border*/
@@ -24,7 +37,7 @@ h1, h2, h3{
   border-style:solid;
   border-width:.5px;
   padding:5px;
-  background-color:#FAF9F6;
+  background-color:#cb132a;
   line-height: 1.5;
   border-color:black;
 }
@@ -34,20 +47,40 @@ h1, h2, h3{
   background-color:#FAF9F6;
 }
 
-.panel-tabset .nav-tabs > li > a {
-  background-color:#FAF9F6 ;
-  color: #333;
+.panel-tabset .nav-tabs > li > a{
+  background-color: #cb132a;
+  border-color:#cb132a;
+  color: #473f3f;
   border-radius: 3px;
   padding: 8px 15px;
   margin-right: 5px;
 }
 
-/* active tab is the one being clicked inactive is the one not cliclked */
-.panel-tabset .nav-tabs a.active {
-  background-color: #E8E7E2;  
-  color: #333;
-  font-weight: 500;
+.panel-tabset .nav-tabs > li > a:hover {
+  background-color: #e62e45;
+  border-color: #cb132a;
+  color: #ffffff;  /* Keep white on hover */
+  border-radius: 3px;
+  padding: 8px 15px;
+  margin-right: 5px;
 }
 
 
+
+
+/* active tab is the one being clicked inactive is the one not cliclked */
+.panel-tabset .nav-tabs a.active {
+  background-color: #a50f22;  
+  border-color:#cb132a;
+  color: #473f3f;
+  font-weight: 500;
+  
+}
+
+.panel-tabset .nav-tabs a.active:hover {
+  background-color: #a50f22;  
+  border-color: #cb132a;
+  color: #ffffff;  /* Stay white */
+  font-weight: 500;
+}
 
