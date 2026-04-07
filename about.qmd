@@ -2,8 +2,8 @@
 title: "About"
 ---
 
-About this site\
-\
+About this site
+
 ## Sam
 
 This is Sam!
@@ -12,6 +12,13 @@ This is Sam!
 
 This is Adrian!!
 
+## Evelyn
+
+This is Evelyn!
+
+## Sophie
+
+This is Sophie!
+
 ```{r}
 1 + 1
-```
