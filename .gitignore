@@ -10,3 +10,6 @@
 
 # Environment variables (API keys)
 .Renviron
+
+# renv library (DO NOT COMMIT)
+renv/library/
