@@ -13,3 +13,6 @@
 
 # renv library (DO NOT COMMIT)
 renv/library/
+
+# prevent project files from getting committed
+*.Rproj
