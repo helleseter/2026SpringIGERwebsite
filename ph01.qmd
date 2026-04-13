@@ -8,18 +8,70 @@ This is a placeholder for part of the website
 
 ```{r}
 #| label: setup
+#| message: false
+#| warning: false
+#| echo: false
 
 library(fredr)
 library(tidyverse)
-library(plotly)
+library(ggiraph)
 
 fredr_set_key(Sys.getenv("FRED_API_KEY"))
+
+GEO_COLS <- c(
+  "United States"        = "#1f77b4",
+  "California"           = "#ff7f0e",
+  "Ventura County"       = "#2ca02c",
+  "Ventura County (MSA)" = "#2ca02c"
+)
+
+fmt_pct    <- function(x) paste0(round(x, 1), "%")
+fmt_dollar <- function(x) paste0("$", formatC(round(x), format = "d", big.mark = ","))
+fmt_M      <- function(x) paste0(round(x, 2), "M")
+fmt_idx    <- function(x) as.character(round(x, 1))
+
+g_opts <- list(
+  opts_hover(css = "stroke-width:2.5;opacity:1;"),
+  opts_hover_inv(css = "opacity:0.15;"),
+  opts_tooltip(
+    css = paste0(
+      "background:white;border:1px solid #ddd;border-radius:6px;",
+      "padding:6px 10px;font-size:12px;font-family:sans-serif;",
+      "box-shadow:0 2px 6px rgba(0,0,0,.12);"
+    ),
+    use_fill = FALSE
+  )
+)
+
+make_chart <- function(df, y_col="value", group_col="geo", col_map,
+                       y_label="", y_fmt_fn=fmt_idx, y_gg_fmt=waiver(), subtitle=NULL) {
+  df <- df %>% rename(y = all_of(y_col), group = all_of(group_col))
+  df <- df %>% mutate(tip = paste0("<b>", group, "</b><br>",
+                                   format(date, "%b %Y"), "<br>", y_fmt_fn(y)))
+  ggplot(df, aes(x = date, y = y, color = group, group = group)) +
+    geom_line_interactive(aes(tooltip = group, data_id = group), linewidth = 0.9) +
+    scale_color_manual(values = col_map) +
+    scale_x_date(date_breaks = "4 years", date_labels = "%Y") +
+    scale_y_continuous(labels = y_gg_fmt) +
+    labs(x = NULL, y = y_label, subtitle = subtitle, color = NULL) +
+    theme_minimal(base_size = 13) +
+    theme(
+      legend.position  = "top",
+      panel.grid.minor = element_blank(),
+      panel.grid.major = element_line(color = "#eeeeee"),
+      axis.text        = element_text(color = "#555555"),
+      plot.subtitle    = element_text(size = 10, color = "#777777")
+    )
+}
+
+wrap <- function(p) girafe(ggobj = p, width_svg = 9, height_svg = 4, options = g_opts)
 ```
 
 ## Unemployment Rate
 
 ```{r}
 #| label: unemployment
+#| echo: false
 
 us_u <- fredr("UNRATE")                %>% mutate(geo = "United States")
 ca_u <- fredr("CAUR")                  %>% mutate(geo = "California")
@@ -29,28 +81,17 @@ unemp <- bind_rows(us_u, ca_u, vc_u) %>%
   select(date, value, geo) %>%
   filter(date >= as.Date("2000-01-01"))
 
-p_unemp <- ggplot(unemp, aes(x = date, y = value, color = geo)) +
-  geom_line(linewidth = 0.8) +
-  scale_color_manual(values = c(
-    "United States"  = "#1f77b4",
-    "California"     = "#ff7f0e",
-    "Ventura County" = "#2ca02c"
-  )) +
-  labs(
-    title    = "Unemployment Rate (%)",
-    subtitle = "Click legend to isolate a region | Hover for values",
-    x = NULL, y = "Unemployment Rate (%)", color = NULL
-  ) +
-  theme_minimal(base_size = 13)
-
-ggplotly(p_unemp, tooltip = c("x", "y", "color")) %>%
-  layout(hovermode = "x unified")
+wrap(make_chart(unemp, y_col="value", group_col="geo", col_map=GEO_COLS,
+  y_label="Unemployment Rate (%)", y_fmt_fn=fmt_pct,
+  y_gg_fmt=function(x) paste0(x, "%"),
+  subtitle="Hover a line to highlight it and see exact values"))
 ```
 
 ## JOLTS — Job Openings, Hires, Quits & Layoffs
 
 ```{r}
 #| label: jolts
+#| echo: false
 
 jolts_series <- c(
   "JTSJOL" = "Job Openings",
@@ -60,59 +101,43 @@ jolts_series <- c(
 )
 
 jolts_data <- map_dfr(names(jolts_series), function(id) {
-  fredr(id) %>%
-    mutate(
-      series = jolts_series[[id]],
-      value  = value / 1000
-    )
+  fredr(id) %>% mutate(series = jolts_series[[id]], value = value / 1000)
 }) %>%
   select(date, value, series) %>%
   filter(date >= as.Date("2005-01-01"))
 
-p_jolts <- ggplot(jolts_data, aes(x = date, y = value, color = series)) +
-  geom_line(linewidth = 0.8) +
-  labs(
-    title    = "JOLTS: Job Openings, Hires, Quits & Layoffs (millions)",
-    subtitle = "United States only — state & county level data not available for JOLTS",
-    x = NULL, y = "Count (millions)", color = NULL,
-    caption  = "Source: BLS Job Openings and Labor Turnover Survey via FRED"
-  ) +
-  theme_minimal(base_size = 13)
+JOLTS_COLS <- c(
+  "Job Openings"         = "#1f77b4",
+  "Hires"                = "#2ca02c",
+  "Quits"                = "#ff7f0e",
+  "Layoffs & Discharges" = "#888888"
+)
 
-ggplotly(p_jolts, tooltip = c("x", "y", "color")) %>%
-  layout(hovermode = "x unified")
+wrap(make_chart(jolts_data, y_col="value", group_col="series", col_map=JOLTS_COLS,
+  y_label="Count (millions)", y_fmt_fn=fmt_M,
+  y_gg_fmt=function(x) paste0(round(x, 1), "M"),
+  subtitle="United States only — state & county level data not available for JOLTS"))
 ```
 
 ## Unemployment Rate: US vs CA vs Ventura County
 
 ```{r}
 #| label: vc-chart
+#| echo: false
 
-recent_unemp <- unemp %>%
-  filter(date >= as.Date("2010-01-01"))
+recent_unemp <- unemp %>% filter(date >= as.Date("2010-01-01"))
 
-p_recent <- ggplot(recent_unemp, aes(x = date, y = value, color = geo)) +
-  geom_line(linewidth = 0.8) +
-  scale_color_manual(values = c(
-    "United States"  = "#1f77b4",
-    "California"     = "#ff7f0e",
-    "Ventura County" = "#2ca02c"
-  )) +
-  labs(
-    title    = "Unemployment Rate: US vs CA vs Ventura County",
-    subtitle = "2010–present | Click legend to isolate",
-    x = NULL, y = "Unemployment Rate (%)", color = NULL
-  ) +
-  theme_minimal(base_size = 13)
-
-ggplotly(p_recent, tooltip = c("x", "y", "color")) %>%
-  layout(hovermode = "x unified")
+wrap(make_chart(recent_unemp, y_col="value", group_col="geo", col_map=GEO_COLS,
+  y_label="Unemployment Rate (%)", y_fmt_fn=fmt_pct,
+  y_gg_fmt=function(x) paste0(x, "%"),
+  subtitle="2010-present | Hover a line to highlight it"))
 ```
 
 ## Latest Snapshot
 
 ```{r}
 #| label: latest-table
+#| echo: false
 
 latest <- recent_unemp %>%
   group_by(geo) %>%
@@ -132,6 +157,7 @@ knitr::kable(latest, digits = 1)
 
 ```{r}
 #| label: gdp-comparison
+#| echo: false
 
 vc_gdp <- fredr("GDPALL06111") %>% mutate(geo = "Ventura County")
 ca_gdp <- fredr("CANGSP")      %>% mutate(geo = "California")
@@ -144,29 +170,16 @@ gdp_all <- bind_rows(vc_gdp, ca_gdp, us_gdp) %>%
   mutate(indexed = value / first(value) * 100) %>%
   ungroup()
 
-p_gdp <- ggplot(gdp_all, aes(x = date, y = indexed, color = geo)) +
-  geom_line(linewidth = 0.8) +
-  geom_point(size = 1.5) +
-  scale_color_manual(values = c(
-    "United States"  = "#1f77b4",
-    "California"     = "#ff7f0e",
-    "Ventura County" = "#2ca02c"
-  )) +
-  labs(
-    title    = "GDP Growth — Indexed to 2001 (100 = Starting Point)",
-    subtitle = "Allows fair comparison across different-sized economies | Annual",
-    x = NULL, y = "Index (2001 = 100)", color = NULL
-  ) +
-  theme_minimal(base_size = 13)
-
-ggplotly(p_gdp, tooltip = c("x", "y", "color")) %>%
-  layout(hovermode = "x unified")
+wrap(make_chart(gdp_all, y_col="indexed", group_col="geo", col_map=GEO_COLS,
+  y_label="Index (2001 = 100)", y_fmt_fn=fmt_idx,
+  subtitle="Allows fair comparison across different-sized economies | Annual"))
 ```
 
 ## Per Capita Personal Income
 
 ```{r}
 #| label: income-comparison
+#| echo: false
 
 vc_inc <- fredr("PCPI06111")       %>% mutate(geo = "Ventura County")
 ca_inc <- fredr("CAPCPI")          %>% mutate(geo = "California")
@@ -176,30 +189,17 @@ income_all <- bind_rows(vc_inc, ca_inc, us_inc) %>%
   select(date, value, geo) %>%
   filter(date >= as.Date("2000-01-01"))
 
-p_income <- ggplot(income_all, aes(x = date, y = value, color = geo)) +
-  geom_line(linewidth = 0.8) +
-  geom_point(size = 1.5) +
-  scale_color_manual(values = c(
-    "United States"  = "#1f77b4",
-    "California"     = "#ff7f0e",
-    "Ventura County" = "#2ca02c"
-  )) +
-  scale_y_continuous(labels = scales::dollar) +
-  labs(
-    title    = "Per Capita Personal Income",
-    subtitle = "US vs California vs Ventura County | Annual",
-    x = NULL, y = "Dollars per person", color = NULL
-  ) +
-  theme_minimal(base_size = 13)
-
-ggplotly(p_income, tooltip = c("x", "y", "color")) %>%
-  layout(hovermode = "x unified")
+wrap(make_chart(income_all, y_col="value", group_col="geo", col_map=GEO_COLS,
+  y_label="Dollars per person", y_fmt_fn=fmt_dollar,
+  y_gg_fmt=function(x) paste0("$", round(x / 1000), "k"),
+  subtitle="US vs California vs Ventura County | Annual"))
 ```
 
 ## Population Growth (Indexed Comparison)
 
 ```{r}
 #| label: population-comparison
+#| echo: false
 
 vc_pop <- fredr("CAVENT2POP") %>% mutate(geo = "Ventura County", value = value * 1000)
 ca_pop <- fredr("CAPOP")      %>% mutate(geo = "California",     value = value * 1000)
@@ -212,28 +212,16 @@ pop_all <- bind_rows(vc_pop, ca_pop, us_pop) %>%
   mutate(indexed = value / first(value) * 100) %>%
   ungroup()
 
-p_pop <- ggplot(pop_all, aes(x = date, y = indexed, color = geo)) +
-  geom_line(linewidth = 0.8) +
-  scale_color_manual(values = c(
-    "United States"  = "#1f77b4",
-    "California"     = "#ff7f0e",
-    "Ventura County" = "#2ca02c"
-  )) +
-  labs(
-    title    = "Population Growth — Indexed to 2000 (100 = Starting Point)",
-    subtitle = "Is Ventura County growing faster or slower than the state and nation?",
-    x = NULL, y = "Index (2000 = 100)", color = NULL
-  ) +
-  theme_minimal(base_size = 13)
-
-ggplotly(p_pop, tooltip = c("x", "y", "color")) %>%
-  layout(hovermode = "x unified")
+wrap(make_chart(pop_all, y_col="indexed", group_col="geo", col_map=GEO_COLS,
+  y_label="Index (2000 = 100)", y_fmt_fn=fmt_idx,
+  subtitle="Is Ventura County growing faster or slower than the state and nation?"))
 ```
 
 ## Nonfarm Payroll Employment
 
 ```{r}
 #| label: payroll-all
+#| echo: false
 
 us_pay <- fredr("PAYEMS")    %>% mutate(geo = "United States")
 ca_pay <- fredr("CANA")      %>% mutate(geo = "California")
@@ -246,20 +234,7 @@ payroll_all <- bind_rows(us_pay, ca_pay, vc_pay) %>%
   mutate(indexed = value / first(value) * 100) %>%
   ungroup()
 
-p_payroll <- ggplot(payroll_all, aes(x = date, y = indexed, color = geo)) +
-  geom_line(linewidth = 0.8) +
-  scale_color_manual(values = c(
-    "United States"        = "#1f77b4",
-    "California"           = "#ff7f0e",
-    "Ventura County (MSA)" = "#2ca02c"
-  )) +
-  labs(
-    title    = "Nonfarm Payroll Employment — Indexed to 2000 (100 = Starting Point)",
-    subtitle = "Ventura County MSA (Oxnard-Thousand Oaks-Ventura) vs CA vs US | Monthly",
-    x = NULL, y = "Index (2000 = 100)", color = NULL
-  ) +
-  theme_minimal(base_size = 13)
-
-ggplotly(p_payroll, tooltip = c("x", "y", "color")) %>%
-  layout(hovermode = "x unified")
+wrap(make_chart(payroll_all, y_col="indexed", group_col="geo", col_map=GEO_COLS,
+  y_label="Index (2000 = 100)", y_fmt_fn=fmt_idx,
+  subtitle="Ventura County MSA (Oxnard-Thousand Oaks-Ventura) vs CA vs US | Monthly"))
 ```
