@@ -1,12 +1,5 @@
 [
   {
-    "objectID": "ph03.html",
-    "href": "ph03.html",
-    "title": "Placeholder 03",
-    "section": "",
-    "text": "This is a placeholder for part of the website"
-  },
-  {
     "objectID": "ph02.html",
     "href": "ph02.html",
     "title": "Placeholder 02",
@@ -14,16 +7,16 @@
     "text": "This is a placeholder for part of the website"
   },
   {
-    "objectID": "ph04.html",
-    "href": "ph04.html",
-    "title": "Placeholder 04",
+    "objectID": "ph03.html",
+    "href": "ph03.html",
+    "title": "Placeholder 03",
     "section": "",
     "text": "This is a placeholder for part of the website"
   },
   {
-    "objectID": "ph01.html",
-    "href": "ph01.html",
-    "title": "Placeholder 01",
+    "objectID": "ph04.html",
+    "href": "ph04.html",
+    "title": "Placeholder 04",
     "section": "",
     "text": "This is a placeholder for part of the website"
   },
@@ -61,6 +54,13 @@
     "title": "About",
     "section": "Sophie",
     "text": "Sophie\nThis is Sophie!\n\n1 + 1\n\n[1] 2"
+  },
+  {
+    "objectID": "ph01.html",
+    "href": "ph01.html",
+    "title": "Placeholder 01",
+    "section": "",
+    "text": "This is a placeholder for part of the website"
   },
   {
     "objectID": "index.html",
